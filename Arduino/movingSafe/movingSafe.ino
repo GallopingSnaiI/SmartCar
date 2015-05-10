@@ -33,7 +33,7 @@ void goForwardSafe(int desiredDistance)
 {
   encoder.begin();
   
-  while(encoder.getDistance() < desiredDistance && !frontIsClear())
+  while(encoder.getDistance() < desiredDistance && frontIsClear())
   {
     bob.goForward();
     //Serial.println("bob going forward.");
@@ -55,10 +55,10 @@ boolean frontIsClear()
   {
     Serial.println("Obstacle detected");
     counter = 0;
-    return true;
+    return false;
   }
   
-  return false;
+  return true;
 }
 
 void brake()
