@@ -3,7 +3,7 @@
 #include <Smartcar_sensors.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial bluetooth(50,51);
+//SoftwareSerial bluetooth(50,51);
 Odometer encoder;
 Smartcar alice;
 Sonar sonar;
@@ -11,6 +11,8 @@ Sonar sonar;
 const int trig_pin = 43;
 const int echo_pin = 42;
 int counter = 0;
+static int i;
+boolean frontIsClear = true;
 
 void setup() 
 {
@@ -26,20 +28,19 @@ void loop()
     //initialize a queue as accommodation
     int arraylength = Serial2.readStringUntil('!').toInt();
     String queue[arraylength];
-    int i = 0;
-           
+    int k = 0;
+        
     //store instructions in queue
-    while(i<arraylength)
-    {
+    while(k<arraylength){
       if(Serial2.available() > 0)
       {
-        queue[i] = Serial2.readStringUntil('*');
-        i++;
+        queue[k] = Serial2.readStringUntil('*');
+        k++;
       }
     }
     
     //interpret and excute instructions
-    for(int i = 0; i<arraylength; i++)
+    for(i = 0; i<arraylength; i++)
     {
         String instr = "";
         String parameter = "";
@@ -81,35 +82,35 @@ void goForwardSafe(int desiredDistance)
   
   while(encoder.getDistance() < desiredDistance)
   {
-    if(!frontIsClear())
+    scan();
+    
+    if(!frontIsClear)
     {
       brake();
-      break;
+      String str = "Obstacle Detected " + ++i;
+      Serial2.println(str);
+      
+      //make alice stand still, just for test.
+      while(true)
+        alice.stop();
     }
     
-    bob.goForward();
+    alice.goForward();
   }
-  
-  
 }
 
-boolean frontIsClear()
+void scan()
 {
   int distance = sonar.getDistance();
   
   if(distance < 25 && distance != 0)
-  {
     counter++;
-  }
   
   if(counter >= 3)
   {
-    Serial.println("Obstacle detected");
-    counter = 0;
-    return true;
+    //counter = 0;
+    frontIsClear = false;
   }
-  
-  return false;
 }
 
 void brake()
