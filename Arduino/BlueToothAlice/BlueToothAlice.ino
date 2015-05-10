@@ -57,11 +57,12 @@ void loop()
       
       //print instruction
       Serial2.println(instr);
-      int value = parameter.toInt();
       
       //excute instruction
+      int value = parameter.toInt();
+      
       if(instr.equals("goForward")){
-          alice.goForward(value);
+          goForwardSafe(value);
       }else if(instr=="rotateClockwise"){
           alice.rotateClockwise(value);
       }else if(instr=="rotateCounterClockwise"){
@@ -71,4 +72,41 @@ void loop()
       }
     }
   }
+}
+
+void goForwardSafe(int desiredDistance)
+{
+  encoder.begin();
+  
+  while(encoder.getDistance() < desiredDistance && !frontIsClear())
+  {
+    //bob.goForward();
+    Serial.println("bob going forward.");
+  }
+  
+  //change when manual mode available
+  while(true)
+  {
+    //bob.stop();
+    Serial.println("bob has stopped.");
+  }
+}
+
+boolean frontIsClear()
+{
+  int distance = sonar.getDistance();
+  
+  if(distance < 30 && distance != 0)
+  {
+    counter++;
+  }
+  
+  if(counter >= 5)
+  {
+    Serial.println("Obstacle detected");
+    counter = 0;
+    return true;
+  }
+  
+  return false;
 }
