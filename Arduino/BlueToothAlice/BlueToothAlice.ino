@@ -3,7 +3,8 @@
 #include <Smartcar_sensors.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial bluetooth(50,51); 
+SoftwareSerial bluetooth(50,51);
+Odometer encoder;
 Smartcar alice;
 Sonar sonar;
 
