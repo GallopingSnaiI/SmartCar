@@ -20,6 +20,13 @@ void setup()
 void loop() 
 {
   goForwardSafe(1000);
+  
+  //stand still
+  while(true)
+  {
+    bob.stop();
+    //Serial.println("bob has stopped.");
+  }
 }
 
 void goForwardSafe(int desiredDistance)
@@ -28,27 +35,23 @@ void goForwardSafe(int desiredDistance)
   
   while(encoder.getDistance() < desiredDistance && !frontIsClear())
   {
-    //bob.goForward();
-    Serial.println("bob going forward.");
+    bob.goForward();
+    //Serial.println("bob going forward.");
   }
   
-  while(true)
-  {
-    //bob.stop();
-    Serial.println("bob has stopped.");
-  }
+  brake();
 }
 
 boolean frontIsClear()
 {
   int distance = sonar.getDistance();
   
-  if(distance < 30 && distance != 0)
+  if(distance < 25 && distance != 0)
   {
     counter++;
   }
   
-  if(counter >= 5)
+  if(counter >= 3)
   {
     Serial.println("Obstacle detected");
     counter = 0;
@@ -58,3 +61,10 @@ boolean frontIsClear()
   return false;
 }
 
+void brake()
+{
+  bob.stop();
+  delay(50);
+  bob.goBackward();
+  delay(100);
+}
