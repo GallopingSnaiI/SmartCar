@@ -1,40 +1,49 @@
-#include <Smartcar.h>
 #include <Wire.h>
+#include <Smartcar.h>
+#include <Smartcar_sensors.h>
 #include <SoftwareSerial.h>
 
 SoftwareSerial bluetooth(50,51); 
 Smartcar alice;
-//int arraylength;
+Sonar sonar;
+
+const int trig_pin = 43;
+const int echo_pin = 42;
+int counter = 0;
 
 void setup() 
 {
- alice.begin();
- Serial2.begin(9600);
+  alice.begin();
+  Serial2.begin(9600);
+  sonar.attach(trig_pin, echo_pin);
 }
 
 void loop() 
 {
   if(Serial2.available() > 0)
-  { //initialize a queue as accommodation
+  { 
+    //initialize a queue as accommodation
     int arraylength = Serial2.readStringUntil('!').toInt();
     String queue[arraylength];
     int i = 0;
-    
+           
     //store instructions in queue
-    while(Serial2.available() > 0 && i<arraylength)
+    while(i<arraylength)
     {
-      //if(){
+      if(Serial2.available() > 0)
+      {
         queue[i] = Serial2.readStringUntil('*');
         i++;
-      //}
+      }
     }
+    
+    //interpret and excute instructions
     for(int i = 0; i<arraylength; i++)
     {
         String instr = "";
         String parameter = "";
         boolean spaceFound = false;
         
-        //interpret instruction
         for(int j = 0; j<queue[i].length(); j++)
         {
           if(queue[i].charAt(j)==' '){
