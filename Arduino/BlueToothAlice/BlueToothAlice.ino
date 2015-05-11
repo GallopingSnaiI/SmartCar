@@ -10,6 +10,7 @@ Sonar sonar;
 
 const int trig_pin = 43;
 const int echo_pin = 42;
+const int odo_pin = 19;
 int counter = 0;
 static int i;
 boolean frontIsClear = true;
@@ -19,6 +20,7 @@ void setup()
   alice.begin();
   Serial2.begin(9600);
   sonar.attach(trig_pin, echo_pin);
+  encoder.attach(odo_pin);
 }
 
 void loop() 
@@ -83,12 +85,14 @@ void goForwardSafe(int desiredDistance)
   while(encoder.getDistance() < desiredDistance)
   {
     scan();
+    int dis = encoder.getDistance();
+    Serial2.print(dis);
     
     if(!frontIsClear)
     {
       brake();
-      String str = "Obstacle Detected " + ++i;
-      Serial2.println(str);
+      Serial2.print("Obstacle Detected ");
+      Serial2.println(++i);
       
       //make alice stand still, just for test.
       while(true)

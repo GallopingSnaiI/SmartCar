@@ -9,6 +9,7 @@ const int echo_pin = 42;
 int counter = 0;
 boolean frontIsClear = true;
 char mode = 'I';
+//String str = "Enter mode: ";
 
 void setup() {
   Serial.begin(4800);
@@ -16,8 +17,11 @@ void setup() {
 }
 
 void loop() {
-  String str = "Enter mode: " + mode;
-  Serial.println(str);
+  int distance = sonar.getDistance();
+  Serial.println(distance);
+  Serial.print("counter: ");
+  Serial.println(counter);
+  Serial.print(mode);
   
   switch(mode){
     default:
@@ -28,9 +32,9 @@ void loop() {
     scan();
     
     if(frontIsClear)
-    Serial.println("Going forward.");
+    Serial.println(": Going forward.\n");
     else{
-      Serial.println("Obstacle detected. Car stop.");
+      Serial.println(": Obstacle detected. Car stop.\n");
       mode = 'M';
     }
     
@@ -39,17 +43,20 @@ void loop() {
     case 'M':
     while(true){}
     break;
-       
  }
 }
 
 void scan()
 {
   int distance = sonar.getDistance();
-  
-  if(distance < 25 && distance != 0)
+//  Serial.println("hej");
+  if(distance < 25 && distance != 0){
+    Serial.print("Obstacle detected at: ");
+    Serial.println(distance);
     counter++;
+  }
   
-  if(counter >= 3)
+  if(counter >= 3){
     frontIsClear = false;
+  }
 }

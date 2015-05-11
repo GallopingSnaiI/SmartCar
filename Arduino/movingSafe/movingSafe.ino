@@ -8,7 +8,7 @@ Sonar sonar;
 
 const int trig_pin = 43;
 const int echo_pin = 42;
-int counter = 0;
+volatile int counter = 0;
   
 void setup() 
 {
