@@ -8,7 +8,7 @@ const int echo_pin = 42;
 
 int counter = 0;
 boolean frontIsClear = true;
-char mode = 'I';
+String mode = "Idle";
 //String str = "Enter mode: ";
 
 void setup() {
@@ -17,35 +17,54 @@ void setup() {
 }
 
 void loop() {
-  int distance = sonar.getDistance();
-  Serial.println(distance);
-  Serial.print("counter: ");
-  Serial.println(counter);
-  Serial.print(mode);
+  //int distance = sonar.getDistance();
+  //Serial.println(distance);
+  //Serial.print("counter: ");
+  //Serial.println(counter);
+  Serial.println(mode);
   
-  switch(mode){
-    default:
-    mode = 'A';
-    break;
+  if(mode == "Idle")
+  {
+    if(Serial.available() > 0){
+      reset();
+      
+      if(Serial.peek() == '$')
+      mode = "Manual";
+      //Serial.readStringUntil('$');
+      else
+      mode = "Auto";
+    }
+  }
+  
+  if(mode == "Auto"){
+    String s = Serial.readString();
     
-    case 'A':
-    scan();
-    
-    if(frontIsClear)
-    Serial.println(": Going forward.\n");
-    else{
-      Serial.println(": Obstacle detected. Car stop.\n");
-      mode = 'M';
+    while(frontIsClear){
+      scan();
+      
+      Serial.println(": Going forward.\n");
     }
     
-    break;
+    Serial.println(": Obstacle detected. Car stop.\n");
+    mode = "Idle";
+  }
+  else if(mode == "Manual"){
+    String s = Serial.readString();
     
-    case 'M':
-    while(true){}
-    break;
- }
+    while(true){
+    if(Serial.available() > 0){
+      if(Serial.peek() == '@'){
+        String s = Serial.readString();
+        Serial.println("Manual mode end, turn back into Idle mode.");
+        mode = "Idle";
+        break;
+      }
+    }
+     Serial.println(": Waiting for manual control.");
+    }
+  }
 }
-
+  
 void scan()
 {
   int distance = sonar.getDistance();
@@ -58,5 +77,11 @@ void scan()
   
   if(counter >= 3){
     frontIsClear = false;
+    counter = 0;
   }
+}
+
+void reset(){
+  counter = 0;
+  frontIsClear = true;
 }
