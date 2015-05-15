@@ -176,7 +176,7 @@ void brake()
   alice.stop();
   delay(50);
   alice.goBackward();
-  delay(50);
+  delay(100);
   alice.stop();
 }
 

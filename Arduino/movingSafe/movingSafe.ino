@@ -8,6 +8,7 @@ Sonar sonar;
 
 const int trig_pin = 43;
 const int echo_pin = 42;
+const int odo_pin = 19;
 volatile int counter = 0;
   
 void setup() 
@@ -15,11 +16,12 @@ void setup()
    Serial.begin(4800);
    bob.begin();
    sonar.attach(trig_pin, echo_pin);
+   encoder.attach(odo_pin);
 }
 
 void loop() 
 {
-  goForwardSafe(1000);
+  goForwardSafe(200);
   
   //stand still
   while(true)
@@ -33,7 +35,7 @@ void goForwardSafe(int desiredDistance)
 {
   encoder.begin();
   
-  while(encoder.getDistance() < desiredDistance && frontIsClear())
+  while(encoder.getDistance() < desiredDistance && isFrontClear())
   {
     bob.goForward();
     //Serial.println("bob going forward.");
@@ -42,7 +44,7 @@ void goForwardSafe(int desiredDistance)
   brake();
 }
 
-boolean frontIsClear()
+boolean isFrontClear()
 {
   int distance = sonar.getDistance();
   
