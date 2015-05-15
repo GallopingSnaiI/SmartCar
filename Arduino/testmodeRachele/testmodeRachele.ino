@@ -9,8 +9,8 @@
 // VARIABLES
 
 // Components
-Odometer encoder;
-Smartcar alice;
+//Odometer encoder;
+//Smartcar alice;
 Sonar sonar;
 
 // Pins
@@ -31,10 +31,11 @@ String mode = "Idle";
 
 void setup() 
 {
-  alice.begin();
-  Serial2.begin(9600);
+ // alice.begin();
+  //Serial2.begin(9600);
+  Serial.begin(4800);
   sonar.attach(trig_pin, echo_pin);
-  encoder.attach(odo_pin);
+  //encoder.attach(odo_pin);
 }
 
 
@@ -42,15 +43,15 @@ void setup()
 
 // Returns the number of instructions expected
 int numOfInstr() {
-  return Serial2.readStringUntil('!').toInt();
+  return Serial.readStringUntil('!').toInt();
 }
 
 // Reads instructions and stores them in the queue
 void storeInstr(String queue[], int queueLen) {
   int indx = 0;
   while (indx < queueLen) {
-    if (Serial2.available() > 0) {
-      queue[indx] = Serial2.readStringUntil('*');
+    if (Serial.available() > 0) {
+      queue[indx] = Serial.readStringUntil('*');
       indx++;
     }
     else
@@ -84,20 +85,21 @@ void executeInstr(String queue[], int queueLen) {
     }
     
     // Prints instruction
-    Serial2.println(instr);
+    Serial.println(instr);
       
     // Executes instruction
     int value = parameter.toInt();
     if (instr.equals("goForward")) {
       goForwardSafe(value);
     } else if (instr=="rotateClockwise") {
-      alice.rotateClockwise(value);
+      //alice.rotateClockwise(value);
+      Serial.println(instr + value);
     } else if (instr=="rotateCounterClockwise") {
-      alice.rotateCounterClockwise(value);
+      Serial.println(instr + value);
     } else {
       // Prints an error message if the instruction doesn't match any of the possible cases
       String error = "Error with instruction: ";
-      Serial2.println(error + i);
+      Serial.println(error + i);
       mode = "Idle";
     }
     // Moves to next instruction
@@ -115,9 +117,11 @@ void executeInstr(String queue[], int queueLen) {
 void goForwardSafe(int desiredDistance)
 {
   // Resets the odometer
-  encoder.begin(); 
+  //encoder.begin(); 
+  int distance = 0;
   
-  while(encoder.getDistance() < desiredDistance)
+  //while(encoder.getDistance() < desiredDistance)
+  while (distance < desiredDistance)
   {
     // Check for obstacles
     scan();
@@ -126,15 +130,19 @@ void goForwardSafe(int desiredDistance)
     if(!frontIsClear)
     {
       brake();
-      alice.stop();
+      //alice.stop();
+      Serial.print("Stop");
       mode = "Idle";
-      Serial2.print("Obstacle Detected ");
-      Serial2.println(++i);
+      Serial.print("Obstacle Detected ");
+      Serial.println(++i);
       counter = 0;
       break;
     }
     
-    alice.goForward();
+    //alice.goForward();
+    Serial.print("Going forward");
+    distance ++;
+    delay(100);
   }
 }
 
@@ -155,9 +163,10 @@ void scan()
 // Brake
 void brake()
 {
-  alice.stop();
+  //alice.stop();
+  Serial.print("Stop");
   delay(50);
-  alice.goBackward();
+  //alice.goBackward();
   delay(100);
 }
 
@@ -178,23 +187,24 @@ void autoMode()
 //MANUAL mode
 void manualMode()
 {
-  String manualIn = Serial2.readStringUntil('*');
+  String manualIn = Serial.readStringUntil('*');
   if (manualIn.equals("@"))
   {
-    Serial2.read();
+    Serial.read();
     mode = "Idle";
   } else
   {
     if (manualIn.equals("goForward")){
-      alice.goForward();
+      //alice.goForward();
+      Serial.println(manualIn);
     }else if (manualIn.equals("goBackward")){
-      alice.goBackward();
+      Serial.println(manualIn);
     }else if (manualIn.equals("rotateClockwise")){
-      alice.rotateClockwise();
+      Serial.println(manualIn);
     }else if(manualIn.equals("rotateCounterClockwise")){
-      alice.rotateCounterClockwise();
-    } else {
-      alice.stop();
+      Serial.println(manualIn);
+    } else if (manualIn.equals("stop")) {
+      Serial.println("Stop");
     }
   }
 }
@@ -205,15 +215,16 @@ void loop()
 {
   if (mode.equals("Idle"))
   {
-    if ((Serial2.available() > 0 && Serial2.peek() != '$'))
+    //Serial.println(mode);
+    if ((Serial.available() > 0 && Serial.peek() != '$'))
     {
       mode = "Auto";
-      Serial2.print(mode);
-    } else if (Serial2.available() > 0 && Serial2.peek() == '$')
+      Serial.print(mode);
+    } else if (Serial.available() > 0 && Serial.peek() == '$')
     {
       mode = "Manual";
-      Serial2.print(mode);
-      String trash = Serial2.readStringUntil('$');
+      Serial.print(mode);
+      String trash = Serial.readStringUntil('$');
     }
   } else if (mode.equals("Auto"))
   {
