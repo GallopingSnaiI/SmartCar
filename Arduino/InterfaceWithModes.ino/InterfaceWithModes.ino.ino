@@ -174,19 +174,19 @@ void autoMode()
 void manualMode()
 {
   String manualIn = Serial2.readStringUntil('*');
-  if (manualIn.equals('@')
+  if (manualIn.equals("@"))
   {
     mode = "Idle";
   } else
   {
     if (manualIn.equals("goForward")){
       alice.goForward();
-    }else if (manualIn.equals("goBackward"){
+    }else if (manualIn.equals("goBackward")){
       alice.goBackward();
-    }else if (manualIn.equals("rotateClockwise"){
+    }else if (manualIn.equals("rotateClockwise")){
       alice.rotateClockwise();
     }else if(manualIn.equals("rotateCounterClockwise")){
-      alice.rotateCounterClockwise()
+      alice.rotateCounterClockwise();
     } else {
       alice.stop();
     }
@@ -197,22 +197,22 @@ void manualMode()
 
 void loop() 
 {
-  if (mode.equals("Idle")
+  if (mode.equals("Idle"))
   {
-    if ((Serial2.available() > 0 && Serial2.peek() != '$')
+    if ((Serial2.available() > 0 && Serial2.peek() != '$'))
     {
       mode = "Auto";
       Serial2.print(mode);
     } else if (Serial2.available() > 0 && Serial2.peek() == '$')
     {
       mode = "Manual";
-      Serial2.print(mode);\
+      Serial2.print(mode);
       String trash = Serial2.readStringUntil('$');
     }
-  } else if (mode.equals("Auto")
+  } else if (mode.equals("Auto"))
   {
    autoMode(); 
-  } else if (mode.equals("Manual")
+  } else if (mode.equals("Manual"))
   {
     manualMode();
   }
