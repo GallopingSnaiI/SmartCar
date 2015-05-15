@@ -22,13 +22,6 @@ void setup()
 void loop() 
 {
   goForwardSafe(200);
-  
-  //stand still
-  while(true)
-  {
-    bob.stop();
-    //Serial.println("bob has stopped.");
-  }
 }
 
 void goForwardSafe(int desiredDistance)
@@ -69,4 +62,5 @@ void brake()
   delay(50);
   bob.goBackward();
   delay(100);
+  bob.stop();
 }
