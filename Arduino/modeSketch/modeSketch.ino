@@ -25,21 +25,25 @@ void loop() {
   
   if(mode == "Idle")
   {
-    if(Serial.available() > 0){
+    if(Serial.available() > 0)
+    {
       reset();
       
       if(Serial.peek() == '$')
-      mode = "Manual";
-      //Serial.readStringUntil('$');
+      {
+        Serial.readStringUntil('$');
+        mode = "Manual";
+      }
       else
       mode = "Auto";
     }
-  }
   
-  if(mode == "Auto"){
+  if(mode == "Auto")
+  {
     String s = Serial.readString();
     
-    while(frontIsClear){
+    while(frontIsClear)
+    {
       scan();
       
       Serial.println(": Going forward.\n");
@@ -48,28 +52,34 @@ void loop() {
     Serial.println(": Obstacle detected. Car stop.\n");
     mode = "Idle";
   }
-  else if(mode == "Manual"){
-    String s = Serial.readString();
-    
-    while(true){
-    if(Serial.available() > 0){
-      if(Serial.peek() == '@'){
-        String s = Serial.readString();
-        Serial.println("Manual mode end, turn back into Idle mode.");
-        mode = "Idle";
-        break;
+  else if(mode == "Manual")
+  {    
+    while(true)
+    {
+      if(Serial.available() > 0)
+      {
+        if(Serial.peek() == '@')
+        {
+          Serial.readStringUntil('@');
+          Serial.println("Manual mode end, turn back into Idle mode.");
+          mode = "Idle";
+          break;
+        }
+        else
+        Serial.readString();
       }
-    }
-     Serial.println(": Waiting for manual control.");
+      Serial.println(": Waiting for manual control.");
     }
   }
+}
 }
   
 void scan()
 {
   int distance = sonar.getDistance();
 //  Serial.println("hej");
-  if(distance < 25 && distance != 0){
+  if(distance < 25 && distance != 0)
+  {
     Serial.print("Obstacle detected at: ");
     Serial.println(distance);
     counter++;
@@ -81,7 +91,8 @@ void scan()
   }
 }
 
-void reset(){
+void reset()
+{
   counter = 0;
   frontIsClear = true;
 }
