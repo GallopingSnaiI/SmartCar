@@ -91,7 +91,7 @@ void executeInstr(String queue[], int queueLen) {
       alice.rotateCounterClockwise(value);
     } else {
       // Prints an error message if the instruction doesn't match any of the possible cases
-      String error = "Error with instruction: "
+      String error = "Error with instruction: ";
       Serial2.println(error + i);
       mode = "Idle";
     }
