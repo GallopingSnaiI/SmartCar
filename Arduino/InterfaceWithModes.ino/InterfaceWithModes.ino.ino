@@ -105,27 +105,7 @@ void executeInstr(String queue[], int queueLen) {
   }
 }
 
-
-void loop() 
-{
-  if(Serial2.available() > 0 && Serial2.peek() != '$')
-  {
-   //Switches to Auto mode
-   mode = "Auto";
-  
-   //Initialize a queue as accommodation
-   int arraylength = numOfInstr();
-   String queue[arraylength];
-    
-   //Store instructions in queue
-   storeInstr(queue, arraylength);
-   
-   //Interpret and excute instructions
-   executeInstr(queue, arraylength);
-  } else if(Serial2.available() > 0 && Serial2.peek() == '$'){
-    mode = "Manual";
-  }
-}
+// GO FORWARD SAFE methods
 
 void goForwardSafe(int desiredDistance)
 {
@@ -153,6 +133,7 @@ void goForwardSafe(int desiredDistance)
   }
 }
 
+// Scan using sonar
 void scan()
 {
   int distance = sonar.getDistance();
@@ -166,6 +147,7 @@ void scan()
   }
 }
 
+// Brake
 void brake()
 {
   alice.stop();
@@ -173,3 +155,70 @@ void brake()
   alice.goBackward();
   delay(100);
 }
+
+//AUTO mode
+void autoMode()
+{
+  //Initialize a queue as accommodation
+    int arraylength = numOfInstr();
+    String queue[arraylength];
+    
+    //Store instructions in queue
+    storeInstr(queue, arraylength);
+   
+    //Interpret and excute instructions
+    executeInstr(queue, arraylength);
+}
+
+//MANUAL mode
+void manualMode()
+{
+  String manualIn = Serial2.readStringUntil('*');
+  if (manualIn.equals('@')
+  {
+    mode = "Idle";
+  } else
+  {
+    if (manualIn.equals("goForward")){
+      alice.goForward();
+    }else if (manualIn.equals("goBackward"){
+      alice.goBackward();
+    }else if (manualIn.equals("rotateClockwise"){
+      alice.rotateClockwise();
+    }else if(manualIn.equals("rotateCounterClockwise")){
+      alice.rotateCounterClockwise()
+    } else {
+      alice.stop();
+    }
+  }
+}
+
+
+
+void loop() 
+{
+  if (mode.equals("Idle")
+  {
+    if ((Serial2.available() > 0 && Serial2.peek() != '$')
+    {
+      mode = "Auto";
+      Serial2.print(mode);
+    } else if (Serial2.available() > 0 && Serial2.peek() == '$')
+    {
+      mode = "Manual";
+      Serial2.print(mode);\
+      String trash = Serial2.readStringUntil('$');
+    }
+  } else if (mode.equals("Auto")
+  {
+   autoMode(); 
+  } else if (mode.equals("Manual")
+  {
+    manualMode();
+  }
+}
+
+
+
+
+
