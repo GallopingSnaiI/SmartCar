@@ -15,33 +15,33 @@ Odometer encoder;
 const int odo_pin = 19;
 
 //global variables
-int counter;
-boolean frontIsClear;
-static int i;
+int counter = 0;
+int i;
 String mode;
 
 void setup() 
 {
-  alice.begin();
-  Serial2.begin(9600);
+  Serial.begin(9600);
   sonar.attach(trig_pin, echo_pin);
   encoder.attach(odo_pin);
-  reset();
+  //reset();
   mode = "Idle";
 }
 
 void loop() 
 {
-  //Idle state
+  /*Idle state
+   *switch modes between auto and manual according to serial input.
+   */
   if(mode == "Idle")
   {
-    if(Serial2.available() > 0)
+    if(Serial.available() > 0)
     {
-      reset();
+      //reset();
       
-      if(Serial2.peek() == '$')
+      if(Serial.peek() == '$')
       {
-        Serial2.readStringUntil('$');
+        Serial.readStringUntil('$');
         mode = "Manual";
       }
       else
@@ -52,18 +52,24 @@ void loop()
   //Auto mode.
   if(mode == "Auto")
   {
-    if(Serial2.available() > 0)
-   { 
+    Serial.println("Anto mode entered.");
+    if(Serial.available() > 0)
+    { 
     //initialize a queue as accommodation
-    int arraylength = Serial2.readStringUntil('!').toInt();
+    int arraylength = Serial.readStringUntil('!').toInt();
+    Serial.print("length = ");
+    Serial.println(arraylength);
     String queue[arraylength];
     int k = 0;
         
     //store instructions in queue
     while(k<arraylength){
-      if(Serial2.available() > 0)
+      if(Serial.available() > 0)
       {
-        queue[k] = Serial2.readStringUntil('*');
+        queue[k] = Serial.readStringUntil('*');
+        Serial.print(k);
+        Serial.print(": ");
+        Serial.println(queue[k]);
         k++;
       }
     }
@@ -71,12 +77,12 @@ void loop()
     //interpret and excute instructions
     for(i = 0; i<arraylength; i++)
     {
-        String instr = "";
-        String parameter = "";
-        boolean spaceFound = false;
-        
-        for(int j = 0; j<queue[i].length(); j++)
-        {
+      String instr = "";
+      String parameter = "";
+      boolean spaceFound = false;
+      
+      for(int j = 0; j<queue[i].length(); j++)
+      {
           if(queue[i].charAt(j)==' '){
             spaceFound = true;
           }else if(spaceFound){
@@ -84,22 +90,20 @@ void loop()
           }else{
             instr += queue[i].charAt(j); 
           }
-        }   
-      
-      //print instruction
-      Serial2.println(instr);
+        }
       
       //excute instruction
       int value = parameter.toInt();
+      Serial.print(instr);
+      Serial.println(value);
       
       if(instr.equals("goForward")){
-          goForwardSafe(value);
+        Serial.println("hej!");
+        goForwardSafe(value);
       }else if(instr=="rotateClockwise"){
-          alice.rotateClockwise(value);
+        alice.rotateClockwise(value);
       }else if(instr=="rotateCounterClockwise"){
-          alice.rotateCounterClockwise(value);
-      }else{
-          //r2d2.rotateClockwise(360);
+        alice.rotateCounterClockwise(value);
       }
     }
    }
@@ -107,68 +111,50 @@ void loop()
 
 else if(mode == "Manual")
   {
-    Serial2.println("Manual mode entered, waiting for manual control.");
+    Serial.println("Manual mode entered, waiting for manual control.");
     
     while(true)
     {
-      if(Serial2.available() > 0)
+      if(Serial.available() > 0)
       {
-        if(Serial2.peek() == '@')
+        if(Serial.peek() == '@')
         {
-          Serial2.readStringUntil('@');
-          Serial2.println("Manual mode end, turn back into Idle mode.");
+          Serial.readStringUntil('@');
+          Serial.println("Manual mode end, turn back into Idle mode.");
           mode = "Idle";
           break;
         }
         else
-        Serial2.readString();
+        Serial.readString();
       }
     }
   }
 }
 
-//reset the global variables
-void reset()
-{
- counter = 0;
- frontIsClear = true; 
-}
-
-void goForwardSafe(int desiredDistance)
-{
+void goForwardSafe(int desiredDistance){
   encoder.begin();
   
-  while(encoder.getDistance() < desiredDistance)
-  {
-    scan();
-    int dis = encoder.getDistance();
-    //Serial2.print(dis);
-    
-    if(!frontIsClear)
-    {
-      brake();
-      mode = "Idle";
-      Serial2.print("Obstacle Detected ");
-      Serial2.println(++i);
-      break;
-    }
-    
+  while(encoder.getDistance() < desiredDistance && isFrontClear()){
     alice.goForward();
   }
+  brake();  
+  mode = "Idle";  
 }
 
-void scan()
-{
+boolean isFrontClear(){
   int distance = sonar.getDistance();
   
-  if(distance < 25 && distance != 0)
+  if(distance < 25 && distance != 0){
     counter++;
-  
-  if(counter >= 3)
-  {
-    //counter = 0;
-    frontIsClear = false;
   }
+  
+  if(counter >= 3){
+    Serial.print("Obstacle Detected at ");
+    Serial.println(++i);
+    counter = 0;
+    return false;
+  }
+  return true;
 }
 
 void brake()
@@ -176,7 +162,6 @@ void brake()
   alice.stop();
   delay(50);
   alice.goBackward();
-  delay(100);
+  delay(75);
   alice.stop();
 }
-
