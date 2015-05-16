@@ -10,6 +10,8 @@ const int trig_pin = 43;
 const int echo_pin = 42;
 const int odo_pin = 19;
 volatile int counter = 0;
+
+int i;
   
 void setup() 
 {
@@ -21,10 +23,56 @@ void setup()
 
 void loop() 
 {
-  if(Serial.available() > 0)
-  { int dis = Serial.readStringUntil('*').toInt();
-    goForwardSafe(dis);
-  }
+   if(Serial.available() > 0){ 
+    //initialize a queue as accommodation
+    int arraylength = Serial.readStringUntil('!').toInt();
+    Serial.print("length = ");
+    Serial.println(arraylength);
+    String queue[arraylength];
+    int k = 0;
+        
+    //store instructions in queue
+    while(k<arraylength){
+      if(Serial.available() > 0)
+      {
+        queue[k] = Serial.readStringUntil('*');
+        Serial.print(k);
+        Serial.print(": ");
+        Serial.println(queue[k]);
+        k++;
+      }
+    }
+    
+    //interpret and excute instructions
+    for(i = 0; i<arraylength; i++)
+    {
+        String instr = "";
+        String parameter = "";
+        boolean spaceFound = false;
+        
+        for(int j = 0; j<queue[i].length(); j++)
+        {
+          if(queue[i].charAt(j)==' '){
+            spaceFound = true;
+          }else if(spaceFound){
+            parameter += queue[i].charAt(j);
+          }else{
+            instr += queue[i].charAt(j); 
+          }
+        }
+      
+      //excute instruction
+      int value = parameter.toInt();
+      
+      if(instr.equals("goForward")){
+          goForwardSafe(value);
+      }else if(instr=="rotateClockwise"){
+          bob.rotateClockwise(value);
+      }else if(instr=="rotateCounterClockwise"){
+          bob.rotateCounterClockwise(value);
+      }
+    }
+}
 }
 
 void goForwardSafe(int desiredDistance)
