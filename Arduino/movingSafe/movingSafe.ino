@@ -21,7 +21,10 @@ void setup()
 
 void loop() 
 {
-  goForwardSafe(200);
+  if(Serial.available() > 0)
+  { int dis = Serial.readStringUntil('*').toInt();
+    goForwardSafe(dis);
+  }
 }
 
 void goForwardSafe(int desiredDistance)
@@ -31,7 +34,6 @@ void goForwardSafe(int desiredDistance)
   while(encoder.getDistance() < desiredDistance && isFrontClear())
   {
     bob.goForward();
-    //Serial.println("bob going forward.");
   }
   
   brake();
@@ -61,6 +63,6 @@ void brake()
   bob.stop();
   delay(50);
   bob.goBackward();
-  delay(100);
+  delay(75);
   bob.stop();
 }
