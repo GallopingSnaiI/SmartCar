@@ -12,47 +12,46 @@ const int odo_pin = 19;
 volatile int counter = 0;
 
 int i;
-
-String mode = "Idle";
+String mode;
   
-void setup() 
-{
+void setup(){
    Serial.begin(4800);
    bob.begin();
    sonar.attach(trig_pin, echo_pin);
    encoder.attach(odo_pin);
 }
 
-void loop() 
-{
+void loop(){
+  while(true){
+    if(Serial.available() > 0){
+      if (Serial.peek() != '$'){
+        mode = "Auto";
+        Serial.println(mode);
+        break;
+      }
+      else if (Serial.peek() == '$'){
+        mode = "Manual";
+        Serial.println(mode);
+        break;
+      }
+    }
+  }
   
-  if (mode.equals("Idle")){
-    //Serial.read();
-  if(Serial.available() > 0){
-    if (Serial.peek() != '$') {
-      mode = "Auto";
-      Serial.println(mode);
-      autoMode();
-    }
-    else if (Serial.peek() == '$'){
-      mode = "Manual";
-      Serial.println(mode);
-      manualMode();
-    }
+  if(mode.equals("Auto")){
+    autoMode();
   }
+  else if(mode.equals("Manual")){
+    manualMode();
   }
-      
 }
 
-void manualMode() {
-  Serial.readStringUntil('$');
+void manualMode(){
   delay(1000);
   mode = "Idle";
-  
 }
   
 
-void autoMode() {
+void autoMode(){
   if(Serial.available() > 0){ 
     //initialize a queue as accommodation
     int arraylength = Serial.readStringUntil('!').toInt();
@@ -63,8 +62,7 @@ void autoMode() {
         
     //store instructions in queue
     while(k<arraylength){
-      if(Serial.available() > 0)
-      {
+      if(Serial.available() > 0){
         queue[k] = Serial.readStringUntil('*');
         Serial.print(k);
         Serial.print(": ");
@@ -74,14 +72,12 @@ void autoMode() {
     }
     
     //interpret and excute instructions
-    for(i = 0; i<arraylength; i++)
-    {
+    for(i = 0; i<arraylength; i++){
         String instr = "";
         String parameter = "";
         boolean spaceFound = false;
         
-        for(int j = 0; j<queue[i].length(); j++)
-        {
+        for(int j = 0; j<queue[i].length(); j++){
           if(queue[i].charAt(j)==' '){
             spaceFound = true;
           }else if(spaceFound){
@@ -102,34 +98,27 @@ void autoMode() {
           bob.rotateCounterClockwise(value);
       }
     }
-    mode = "Idle";
-    Serial.println(mode);
 }
 }
 
-void goForwardSafe(int desiredDistance)
-{
+void goForwardSafe(int desiredDistance){
   encoder.begin();
   
-  while(encoder.getDistance() < desiredDistance && isFrontClear())
-  {
+  while(encoder.getDistance() < desiredDistance && isFrontClear()){
     bob.goForward();
   }
   
   brake();
 }
 
-boolean isFrontClear()
-{
+boolean isFrontClear(){
   int distance = sonar.getDistance();
   
-  if(distance < 25 && distance != 0)
-  {
+  if(distance < 25 && distance != 0){
     counter++;
   }
   
-  if(counter >= 3)
-  {
+  if(counter >= 3){
     Serial.println("Obstacle detected");
     counter = 0;
     mode = "Idle";
@@ -140,8 +129,7 @@ boolean isFrontClear()
   return true;
 }
 
-void brake()
-{
+void brake(){
   bob.stop();
   delay(50);
   bob.goBackward();
