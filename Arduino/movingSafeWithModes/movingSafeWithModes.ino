@@ -25,7 +25,9 @@ void setup()
 
 void loop() 
 {
+  
   if (mode.equals("Idle")){
+    //Serial.read();
   if(Serial.available() > 0){
     if (Serial.peek() != '$') {
       mode = "Auto";
@@ -43,6 +45,7 @@ void loop()
 }
 
 void manualMode() {
+  Serial.readStringUntil('$');
   delay(1000);
   mode = "Idle";
   
