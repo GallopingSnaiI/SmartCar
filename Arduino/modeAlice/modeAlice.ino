@@ -24,7 +24,6 @@ void setup()
   Serial.begin(9600);
   sonar.attach(trig_pin, echo_pin);
   encoder.attach(odo_pin);
-  //reset();
   mode = "Idle";
 }
 
@@ -36,9 +35,7 @@ void loop()
   if(mode == "Idle")
   {
     if(Serial.available() > 0)
-    {
-      //reset();
-      
+    {      
       if(Serial.peek() == '$')
       {
         Serial.readStringUntil('$');
