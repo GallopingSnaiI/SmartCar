@@ -48,6 +48,7 @@ void manualMode() {
   Serial.readStringUntil('$');
   delay(1000);
   mode = "Idle";
+  //Serial.read();
   
 }
   
@@ -104,6 +105,7 @@ void autoMode() {
     }
     mode = "Idle";
     Serial.println(mode);
+    //Serial.read();
 }
 }
 
@@ -134,6 +136,7 @@ boolean isFrontClear()
     counter = 0;
     mode = "Idle";
     Serial.println(mode);
+    //Serial.read();
     return false;
   }
   
