@@ -48,7 +48,6 @@ void loop(){
 
 void manualMode() {
   Serial.println("Manual mode entered, waiting for manual control.");
-  //Serial2.readStringUntil('$');
   String instr;
   
   while(true){
@@ -67,14 +66,19 @@ void manualMode() {
       }
       if(instr.equals("goForward")){
         Serial.println("Going forward.");
+        alice.goForward();
       }else if(instr.equals("goBackward")){
         Serial.println("Going backward.");
+        alice.goBackward();
       }else if(instr.equals("rotateClockwise")){
         Serial.println("Rotating clockwise.");
+        alice.rotateClockwise();
       }else if(instr.equals("rotateCounterClockwise")){
         Serial.println("Rotating counterclockwise");
+        alice.rotateCounterClockwise();
       }else{
         Serial.println("Stop.");
+        alice.stop();
       }
     }
   }
@@ -96,15 +100,12 @@ void autoMode(){
     }
     
     //interpret and excute instructions
-    //obstacle = false;
-    for(index = 0; index<arraylength && !obstacle; index++)
-    {
+    for(index = 0; index<arraylength && !obstacle; index++){
         String instr = "";
         String parameter = "";
         boolean spaceFound = false;
         
-        for(int j = 0; j<queue[index].length(); j++)
-        {
+        for(int j = 0; j<queue[index].length(); j++){
           if(queue[index].charAt(j)==' '){
             spaceFound = true;
           }else if(spaceFound){
@@ -150,7 +151,6 @@ boolean isFrontClear(){
     str += index;
     Serial.println(str);
     
-    //counter = 0;
     obstacle = true;
     return false;
   }
