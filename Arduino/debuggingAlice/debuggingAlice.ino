@@ -1,6 +1,7 @@
-#include <Smartcar_sensors.h>
 #include <Smartcar.h>
+#include <Smartcar_sensors.h>
 #include <Wire.h>
+#include <SoftwareSerial.h>
 
 Smartcar alice;
 
@@ -11,14 +12,13 @@ Sonar sonar;
 const int trig_pin = 43;
 const int echo_pin = 42;
 
-volatile int counter = 0;
-int i;
+volatile int counter;
 boolean obstacle;
-
+int index;
 String mode;
   
 void setup(){
-   Serial.begin(9600);
+   Serial2.begin(9600);
    alice.begin();
    alice.setAutomationRotationSpeed(100);
    sonar.attach(trig_pin, echo_pin);
@@ -26,14 +26,15 @@ void setup(){
 }
 
 void loop(){
-  Serial.println("Car waiting");
+  Serial2.println("Car waiting");
   while(true){    
-    if(Serial.available() > 0){
-      if (Serial.peek() == '$'){
+    if(Serial2.available() > 0){
+      if (Serial2.peek() == '$'){
         mode = "Manual";
         break;
       }else{
         mode = "Auto";
+        reset();
         break;
       }
     }
@@ -46,56 +47,54 @@ void loop(){
 }
 
 void manualMode() {
-  Serial.println("Manual mode entered, waiting for manual control.");
-  Serial.readStringUntil('$');
+  Serial2.println("Manual mode entered, waiting for manual control.");
+  Serial2.readStringUntil('$');
   
   while(true){
-    if(Serial.available() > 0){
-        if(Serial.peek() == '@'){
-          Serial.readStringUntil('@');
-          Serial.println("Manual mode end, turn back into idle mode.");
-          //mode = "Idle";
+    if(Serial2.available() > 0){
+        if(Serial2.peek() == '@'){
+          Serial2.readStringUntil('@');
+          Serial2.println("Manual mode end, turn back into idle mode.");
           break;
         }
         else
-        Serial.readString();
+        Serial2.readString();
       }
     }
   }
   
-
 void autoMode(){
-  Serial.println("Auto mode entered.");
-  if(Serial.available() > 0){ 
+  Serial2.println("Auto mode entered.");
+  if(Serial2.available() > 0){ 
     //initialize a queue as accommodation
-    int arraylength = Serial.readStringUntil('!').toInt();
+    int arraylength = Serial2.readStringUntil('!').toInt();
     String queue[arraylength];
     int k = 0;
         
     //store instructions in queue
     while(k<arraylength){
-      if(Serial.available() > 0){
-        queue[k] = Serial.readStringUntil('*');
+      if(Serial2.available() > 0){
+        queue[k] = Serial2.readStringUntil('*');
         k++;
       }
     }
     
     //interpret and excute instructions
-    obstacle = false;
-    for(i = 0; i<arraylength && !obstacle; i++)
+    //obstacle = false;
+    for(index = 0; index<arraylength && !obstacle; index++)
     {
         String instr = "";
         String parameter = "";
         boolean spaceFound = false;
         
-        for(int j = 0; j<queue[i].length(); j++)
+        for(int j = 0; j<queue[index].length(); j++)
         {
-          if(queue[i].charAt(j)==' '){
+          if(queue[index].charAt(j)==' '){
             spaceFound = true;
           }else if(spaceFound){
-            parameter += queue[i].charAt(j);
+            parameter += queue[index].charAt(j);
           }else{
-            instr += queue[i].charAt(j); 
+            instr += queue[index].charAt(j); 
           }
         }
       
@@ -110,10 +109,7 @@ void autoMode(){
           alice.rotateCounterClockwise(value);
       }
     }
-    //mode = "Idle";
-    //Serial.println(mode);
-    //Serial.read();
-}
+  }
 }
 
 void goForwardSafe(int desiredDistance){
@@ -135,14 +131,11 @@ boolean isFrontClear(){
   
   if(counter >= 3){
     String str = "Obstacle ";
-    str += i;
-    Serial.println(str);
+    str += index;
+    Serial2.println(str);
     
-    counter = 0;
+    //counter = 0;
     obstacle = true;
-    //mode = "Idle";
-    //Serial.println(mode);
-    //Serial.read();
     return false;
   }
   
@@ -155,4 +148,9 @@ void brake(){
   alice.goBackward();
   delay(75);
   alice.stop();
+}
+
+void reset(){
+  counter = 0;
+  obstacle = false;
 }
