@@ -18,18 +18,18 @@ int index;
 String mode;
   
 void setup(){
-   Serial.begin(9600);
+   Serial2.begin(9600);
+   
    alice.begin();
-   alice.setAutomationRotationSpeed(100);
    sonar.attach(trig_pin, echo_pin);
    encoder.attach(odo_pin);
 }
 
 void loop(){
-  Serial.println("Car waiting");
+  //Serial2.println("Car waiting");
   while(true){    
-    if(Serial.available() > 0){
-      if (Serial.peek() == '$'){
+    if(Serial2.available() > 0){
+      if (Serial2.peek() == '$'){
         mode = "Manual";
         break;
       }else{
@@ -47,54 +47,57 @@ void loop(){
 }
 
 void manualMode() {
-  Serial.println("Manual mode entered, waiting for manual control.");
+  alice.setAutomationRotationSpeed(150);
+  //Serial2.println("Manual mode entered, waiting for manual control.");
   String instr;
   
-  while(true){
-    if(Serial.available() > 0){
+  while(true){    
+    if(Serial2.available() > 0){
         
-      if(Serial.peek() == '@'){
-          Serial.readStringUntil('@');
-          Serial.println("Manual mode end, turn back into idle mode.");
+      if(Serial2.peek() == '@'){
+          Serial2.readStringUntil('@');
+          //Serial2.println("Manual mode end, turn back into idle mode.");
           break;
-        }else if(Serial.peek() == '$'){
-          Serial.readStringUntil('$');
-          instr = Serial.readStringUntil('*');
+        }else if(Serial2.peek() == '$'){
+          Serial2.readStringUntil('$');
+          instr = Serial2.readStringUntil('*');
         }else{
-          Serial.read();
+          Serial2.read();
         }
       }
+      
       if(instr.equals("goForward")){
-        Serial.println("Going forward.");
+        //Serial2.println("Going forward.");
         alice.goForward();
       }else if(instr.equals("goBackward")){
-        Serial.println("Going backward.");
+       // Serial2.println("Going backward.");
         alice.goBackward();
       }else if(instr.equals("rotateClockwise")){
-        Serial.println("Rotating clockwise.");
-        alice.rotateClockwise();
+        //Serial2.println("Rotating clockwise.");
+        alice.rotateClockwise(1);
       }else if(instr.equals("rotateCounterClockwise")){
-        Serial.println("Rotating counterclockwise");
-        alice.rotateCounterClockwise();
+        //Serial2.println("Rotating counterclockwise");
+        alice.rotateCounterClockwise(1);
       }else{
-        Serial.println("Stop.");
+        //Serial2.println("Stop.");
         alice.stop();
       }
     }
   }
   
 void autoMode(){
-  Serial.println("Auto mode entered.");
-  if(Serial.available() > 0){ 
+  alice.setAutomationRotationSpeed(100);
+  //Serial2.println("Auto mode entered.");
+  if(Serial2.available() > 0){ 
     //initialize a queue as accommodation
-    int arraylength = Serial.readStringUntil('!').toInt();
+    int arraylength = Serial2.readStringUntil('!').toInt();
     String queue[arraylength];
     int k = 0;
         
     //store instructions in queue
     while(k<arraylength){
-      if(Serial.available() > 0){
-        queue[k] = Serial.readStringUntil('*');
+      if(Serial2.available() > 0){
+        queue[k] = Serial2.readStringUntil('*');
         k++;
       }
     }
@@ -149,7 +152,7 @@ boolean isFrontClear(){
   if(counter >= 3){
     String str = "Obstacle ";
     str += index;
-    Serial.println(str);
+    Serial2.println(str);
     
     obstacle = true;
     return false;
