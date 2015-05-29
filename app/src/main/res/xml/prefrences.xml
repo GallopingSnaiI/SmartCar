@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+    >
+    <ListPreference
+        android:key="PREF_LIST"
+        android:title="Simplification Sensitivity"
+        android:summary="Change how much the application simplifies your line."
+        android:entries="@array/loopEntry"
+        android:entryValues="@array/testValue"
+        android:defaultValue="@string/default_value"/>
+
+    <ListPreference
+        android:key="LOOP_LIST"
+        android:title="Sensitivity of Auto-Loop"
+        android:summary="Change sensitivity of the auto-loop functionality."
+        android:entries="@array/loopEntry"
+        android:entryValues="@array/loopValue"
+        android:defaultValue="@string/default_value"/>
+
+    <ListPreference
+        android:key="MODIFY_LIST"
+        android:title="Sensitivity of line modification"
+        android:summary="Change how close to the line you have to touch to modify the line."
+        android:entries="@array/loopEntry"
+        android:entryValues="@array/loopValue"
+        android:defaultValue="@string/default_value"/>
+
+    <EditTextPreference
+        android:key="SCALE_EDITTEXT"
+        android:title="Scale of driving area"
+        android:summary="Input how wide the driving area is to scale it to number of pixels."
+        android:dialogTitle="Width of area in centimeters."
+        android:inputType="number"/>
+
+    <Preference android:title="Background" android:key="BACK_PREF" android:layout="@layout/settingslayout"/>
+
+
+
+
+</PreferenceScreen>

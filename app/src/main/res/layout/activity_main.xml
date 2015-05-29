@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity"
@@ -15,50 +15,133 @@
         android:layout_height="match_parent"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:divider="?android:attr/dividerHorizontal"
+        android:showDividers="beginning"
+        android:paddingTop="16dp">
+
+        <com.example.kai.mulitactivityapp.ManualControlView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="top"
+            android:id="@+id/manualView"
+            android:visibility="gone"
+            />
+
         <com.example.kai.mulitactivityapp.PathDrawView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="top"
-            android:id="@+id/canvas" />
+            android:id="@+id/canvas"
+            android:visibility="visible"/>
+
         <View
             android:layout_width="fill_parent"
             android:layout_height="2dp"
             android:background="#c0c0c0"/>
-        <TextView
+        <!--<TextView
             android:maxLines = "1000"
             android:scrollbars = "vertical"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="15dp"
             android:layout_gravity="right"
             android:text="Walk 10 \n Rotate 90deg \nWalk 10 \n Rotate 90deg \nWalk 10 \n Rotate 90deg \nWalk 10 \n Rotate 90deg"
             android:id="@+id/text"
-            android:focusableInTouchMode="true" />
+            android:focusableInTouchMode="true" /> -->
+
 <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    style="?android:attr/buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:measureWithLargestChild="true"
+    >
+        <LinearLayout android:id="@+id/leftSpacer"
+            android:layout_weight="0.25"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone" />
+
         <Button
-            android:layout_width="wrap_content"
+            android:id="@+id/connect"
+            android:layout_width="0dip"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Connect"
-            android:id="@+id/connect"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="left"
+            android:maxLines="2"
+            style="?android:attr/buttonBarButtonStyle"
+
+            />
+        <View
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="7dp"
+            android:layout_marginTop="7dp"
+            android:layout_width="2px"
+            android:background="#90909090"/>
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send"
-            android:id="@+id/send"
-            android:layout_gravity="right" />
 
-        <TextView
+            android:id="@+id/send"
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Send"
+            android:maxLines="2"
+            android:filterTouchesWhenObscured="true"
+            style="?android:attr/buttonBarButtonStyle"
+
+             />
+
+        <View
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="7dp"
+            android:layout_marginTop="7dp"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <Button
+
+            android:id="@+id/swapButton"
+            android:layout_width="0dip"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Manual Mode"
+            android:onClick="onClick"
+            android:nestedScrollingEnabled="true"
+            android:maxLines="2"
+            android:layout_gravity="right"
+            style="?android:attr/buttonBarButtonStyle"
+
+        />
+
+
+
+    <!-- <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Waiting..."
-            android:id="@+id/data" />
-</LinearLayout>
+            android:id="@+id/data"
+            android:visibility="gone"/> -->
 
+
+
+        <LinearLayout android:id="@+id/rightSpacer"
+            android:layout_width="0dip"
+            android:layout_weight="0.25"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone" />
+
+
+
+</LinearLayout>
     </LinearLayout>
 
-</RelativeLayout>
+  </RelativeLayout>
+
+

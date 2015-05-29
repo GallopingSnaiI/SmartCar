@@ -1,6 +1,12 @@
 <resources>
-    <string name="app_name">MulitActivityApp</string>
+    <string name="app_name">PathCar</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="pref_syncConnectionTypes_default">testDefaultOne, testDefaultTwo, testDefaultThree</string>
+    <string name="TargetSummary">This is a Summary.</string>
+    <string name="TargetTitle">This is the title</string>
+    <string name="testDialogTitle">testDialogTitle</string>
+    <string name="mode_repeat">testTitle</string>
+    <string name="default_value">Low</string>
 </resources>

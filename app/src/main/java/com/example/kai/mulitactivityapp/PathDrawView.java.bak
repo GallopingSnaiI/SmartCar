@@ -2,25 +2,37 @@ package com.example.kai.mulitactivityapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Point;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.VelocityTrackerCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.DragEvent;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.view.GestureDetector.*;
 
 /**
  * Created by Kai on 01/03/2015.
@@ -39,33 +51,19 @@ class PathDrawView extends View {
     private static final int MAX_POINTS = 0;
     private static double EPSILON = 3;
     private volatile Stack<Point> points = new Stack<>();
-    private Paint pathPaint,errorPaint;
-    private static final int darkGray = Color.argb(255,70,70,70);
-    private static final int yellow = Color.argb(255, 255, 225, 0);
+    private Paint pathPaint,walkerPaint;
+    private static final int orange = Color.argb(255, 255, 102, 0);
+    private static final int yellow = Color.argb(255, 255, 255, 0);
+    private TextView textView;
     private static final int MIN_DISTANCE = 5;
-    private int obstacleIndex = -1;
     List<String> stringList;
     private SharedPreferences sharedPreferences;
 
     private Stack<Point> pointsValidated = new Stack<>();
     private Stack<Point> pointsRaw = new Stack<>();
     boolean validated = false;
-    private static Bitmap givenBackgroundBitmap = null;
-    private Button swapButton;
-
-    public static void setGivenBackgroundBitmap(Bitmap givenBackgroundBitmap) {
-        PathDrawView.givenBackgroundBitmap = givenBackgroundBitmap;
-    }
 
     // private Walker walker = new Walker(300,300,Math.PI/6,3.5,Math.PI/60);
-
-    public void onObstacleDetected(int instructionIndex){
-        obstacleIndex = (instructionIndex+1)/2+1;
-    }
-
-    public void resetObstacleDetected(){
-        obstacleIndex = -1;
-    }
 
 
     public PathDrawView(Context context) {
@@ -96,40 +94,33 @@ class PathDrawView extends View {
         pathPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         pathPaint.setStyle(Paint.Style.STROKE);
         pathPaint.setStrokeWidth(6);
+        pathPaint.setColor(orange);
         pathPaint.setShadowLayer(10, 0, 0, Color.BLACK);
 
-        errorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        errorPaint.setStyle(Paint.Style.STROKE);
-        errorPaint.setStrokeWidth(6);
-        errorPaint.setShadowLayer(10, 0, 0, Color.BLACK);
-        errorPaint.setColor(Color.RED);
-
+        walkerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        walkerPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        walkerPaint.setColor(Color.argb(255, 0, 0, 0));
         this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+    /*
         Timer t;
         t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if(errorPaint.getColor()==Color.RED){
-                    errorPaint.setColor(darkGray);
-                }else{
-                    errorPaint.setColor(Color.RED);
-                }
-                postInvalidate();
+                if(points.size()>=2)
+                    walker.update(points);
+                    postInvalidate();
             }
-        },400,400);
-
+        },20,20);
+        */
     }
+
     private void invalidateScreen(){
         this.invalidate();
     }
 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        if(givenBackgroundBitmap != null){
-            canvas.drawBitmap(givenBackgroundBitmap, 0, 0, null);
-        }
 
         Stack<Point> points;
 
@@ -138,21 +129,35 @@ class PathDrawView extends View {
 
         if (!points.isEmpty()) {
             Point prev = points.firstElement();
-            int i = 0;
+            boolean b = true;
             for (Point p : points) {
-                if(i++== obstacleIndex){
-                    canvas.drawLine(p.x, p.y, prev.x, prev.y, errorPaint);
-                }else{
-                    canvas.drawLine(p.x, p.y, prev.x, prev.y, pathPaint);
+                if (b) {
+                    if(validated)pathPaint.setColor(Color.BLACK);
+                    else pathPaint.setColor(orange);
+                    b = false;
                 }
-
+                canvas.drawLine(p.x, p.y, prev.x, prev.y, pathPaint);
                 prev = p;
             }
         }
        // drawTriangle(canvas,(int)walker.x,(int)walker.y,walker.theta);
     }
 
+    private void drawTriangle(Canvas canvas,int x, int y, double theta) {
+        Point o = new Point(x,y);
+        Point a = rotatePoint(new Point(x,y-35),o,theta-Math.PI/2);
+        Point b = rotatePoint(new Point(x-25,y+35),o,theta-Math.PI/2);
+        Point c = rotatePoint(new Point(x+25,y+35),o,theta-Math.PI/2);
 
+        //rotatePoint(a,o,theta);rotatePoint(b,o,theta);rotatePoint(c,o,theta);
+
+        Path triPath = new Path();
+        triPath.moveTo(a.x, a.y);
+        triPath.lineTo(b.x,b.y);
+        triPath.lineTo(c.x, c.y);
+        triPath.lineTo(a.x, a.y);
+        canvas.drawPath(triPath, walkerPaint);
+    }
 
     static Point rotatePoint(Point pointToRotate, Point centerPoint, double theta)
     {
@@ -190,7 +195,7 @@ class PathDrawView extends View {
         if (action == MotionEvent.ACTION_MOVE) {
             this.addPoint(event.getX(), event.getY());
         } else if (action == MotionEvent.ACTION_DOWN) {
-            obstacleIndex = -1;
+
             String editValue = sharedPreferences.getString("MODIFY_LIST","testString2");
 
             if(editValue.compareTo("testString1") == 0){
@@ -204,7 +209,6 @@ class PathDrawView extends View {
             }
 
             if(getDistToPath(event.getX(), event.getY(),pointsRaw)<EDIT_DISTANCE){
-                this.pathPaint.setColor(yellow);
                 Point p = getClosestPointOnPath(event.getX(), event.getY());
                 int i = pointsRaw.indexOf(p);
                 Stack<Point> temp = new Stack<>();
@@ -218,7 +222,7 @@ class PathDrawView extends View {
         } else if (action == MotionEvent.ACTION_UP) {
             this.validateLine();
             validated = true;
-            this.pathPaint.setColor(darkGray);
+            this.pathPaint.setColor(orange);
         }
 
         return true;
@@ -250,7 +254,7 @@ class PathDrawView extends View {
         return minDist;
     }
 
-    public synchronized void validateLine() {
+    private synchronized void validateLine() {
         this.validated = false;
 
  		String loopValue = sharedPreferences.getString("LOOP_LIST","testString2");
@@ -296,11 +300,14 @@ class PathDrawView extends View {
                 i--;
             }
 
-
         }
 
-        stringList = toStringList(pointsValidated, DEFAULT_SCALE, VIEW_DIMENSION, sharedPreferences);
-
+        if (textView != null) {
+            textView.setText("");
+            for (String s:toStringList(pointsValidated, DEFAULT_SCALE, VIEW_DIMENSION, sharedPreferences)) textView.append(s + "\n");
+            stringList = toStringList(pointsValidated, DEFAULT_SCALE, VIEW_DIMENSION, sharedPreferences);
+            textView.setMovementMethod(new ScrollingMovementMethod());
+        }
 
         this.invalidate();
     }
@@ -474,7 +481,7 @@ class PathDrawView extends View {
         if(!points.empty())
             result.add(points.lastElement());
 
-        //For each point (Excluding final) move to the midpoint between it and the point immediately after
+        //For each point (Excluding final) move to the midpoint between it and the point immediatly after
         for(int i = 1;i<result.size()-1;i++){
             Point p1 = result.get(i);
             Point p2 = result.get(i+1);
@@ -499,6 +506,9 @@ class PathDrawView extends View {
         return points;
     }
 
+    public void assignTextView(TextView textView) {
+        this.textView = textView;
+    }
 
     public static int getDispSquared(Stack<Point> points) {
         if(points.size()>0) {
@@ -672,18 +682,5 @@ class PathDrawView extends View {
 
     public void addSharedPreferences(SharedPreferences shPref) {
         this.sharedPreferences = shPref;
-    }
-
-    public void setswapButton(Button swapButton) {
-        this.swapButton = swapButton;
-    }
-
-    public Button getSwapButton() {
-        return swapButton;
-    }
-
-    public void setSwapButton(Button swapButton) {
-        if(swapButton == null)System.out.println("OMFG");
-        this.swapButton = swapButton;
     }
 }

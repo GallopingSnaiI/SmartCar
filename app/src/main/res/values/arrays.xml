@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="testValue">
+        <item>testValue1</item>
+        <item>testValue2</item>
+        <item>testValue3</item>
+    </string-array>
+
+    <string-array name="testEntry">
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+    </string-array>
+
+    <string-array name="testArray">
+        <item>testString1</item>
+        <item>testString2</item>
+        <item>testString3</item>
+    </string-array>
+
+
+<string-array name="empty_array" />
+    <string-array name="loopEntry">
+        <item>Off</item>
+        <item>Low</item>
+        <item>High</item>
+    </string-array>
+
+    <string-array name="loopValue">4
+        <item>testString1</item>
+        <item>testString2</item>
+        <item>testString3</item>
+    </string-array>
+
+</resources>
